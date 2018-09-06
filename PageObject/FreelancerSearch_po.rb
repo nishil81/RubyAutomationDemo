@@ -1,4 +1,5 @@
-require "selenium-webdriver"
+require 'selenium-webdriver'
+require '../Specs/FreelancerSearch_specs'
 
 class FreelancerSearch_Po
   # general varioables
@@ -12,15 +13,26 @@ class FreelancerSearch_Po
   @@freelancerName_List = "//h4/a[@class='freelancer-tile-name']"
   @@frellancertitle_List = "//h4[contains(@class,'freelancer-tile-title')]"
   @@freelancerDes_List = "//div[contains(@class,'d-none') and @data-profile-description]"
-  @@freelancerTile_List = "//article/div[1]"
+  @@freelancerTile_List = '//article/div[1]'
+
+  @@freelancerNameOnDetailPage = "//div[@class='media-body']//span[@itemprop='name']"
+
+  browser = FreelancerSearch_Spec.setBrowser
 
   def init
-    Selenium::WebDriver::Chrome.driver_path = "C:\\Users\\Tesbo\\RubymineProjects\\untitled\\Lib\\chromedriver_win32\\chromedriver.exe"
-    # Selenium::WebDriver::Firefox.driver_path = "C:\\Users\\Tesbo\\RubymineProjects\\untitled\\Lib\\geckodriver-v0.21.0-win64\\geckodriver.exe"
+    if searchSpec.browser.equal? 'chrome'
 
-    @driver = Selenium::WebDriver.for :chrome
+      Selenium::WebDriver::Chrome.driver_path = File.expand_path('../chromedriver_mac/chromedriver', Dir.pwd)
+      @driver = Selenium::WebDriver.for :chrome
+
+    elsif searchSpec.browser.equal? 'firefox'
+      Selenium::WebDriver::Firefox.driver_path = File.expand_path('../geckodriver_mac/geckodriver', Dir.pwd)
+      @driver = Selenium::WebDriver.for :firefox
+
+      end
+
     @driver.manage.delete_all_cookies
-    @driver.navigate.to "https://upwork.com/"
+    @driver.navigate.to 'https://upwork.com/'
 
     @driver.manage.window.maximize
       end
@@ -37,25 +49,25 @@ class FreelancerSearch_Po
     sleep(1)
 
     begin
-          find_element("#{@@freelancerSearchBoxArrow_icon}").click
+          find_element(@@freelancerSearchBoxArrow_icon.to_s).click
           sleep(1)
-          find_element("#{@@findFreelancerOption_text}").click
+          find_element(@@findFreelancerOption_text.to_s).click
         rescue StandardError => msg
         end
 
     sleep(5)
-    freelancer_textBox = find_element("#{@@findfreelancer_searchbox}")
+    freelancer_textBox = find_element(@@findfreelancer_searchbox.to_s)
 
-    freelancer_textBox.send_keys "#{keyword}"
+    freelancer_textBox.send_keys keyword.to_s
     freelancer_textBox.send_keys :return
     # sleep(200)
   end
 
   def parse_data
     sleep(10)
-    nameList = find_elements("#{@@freelancerName_List}")
-    titleList = find_elements("#{@@frellancertitle_List}")
-    desList = find_elements("#{@@freelancerDes_List}")
+    nameList = find_elements(@@freelancerName_List.to_s)
+    titleList = find_elements(@@frellancertitle_List.to_s)
+    desList = find_elements(@@freelancerDes_List.to_s)
 
     listSize = nameList.length
 
@@ -74,9 +86,9 @@ class FreelancerSearch_Po
                         'tag' => taglist]
 
       @freelancerList << freelancer
-
     end
     @freelancerList
+    @@nameOnDetailPage = nameList[0].text
   end
 
   def assert_data(keyword)
@@ -90,13 +102,13 @@ class FreelancerSearch_Po
         puts "Keyword #{keyword} Not found in Name"
         end
 
-      if arrayMember['title'].downcase.include? "#{keyword.downcase}"
+      if arrayMember['title'].downcase.include? keyword.downcase.to_s
         puts "Keyword #{keyword} found in title"
       else
         puts "Keyword #{keyword} Not found in title"
       end
 
-      if arrayMember['desc'].downcase.include? "#{keyword.downcase}"
+      if arrayMember['desc'].downcase.include? keyword.downcase.to_s
         puts "Keyword #{keyword.downcase} found in des"
       else
         puts "Keyword #{keyword} Not found in des"
@@ -106,11 +118,7 @@ class FreelancerSearch_Po
   end
 
   def select_first_freelancer
-    r = Random.new
-
-    nameList = find_elements("#{@@freelancerTile_List}")
-
-    r = r.rand(0...nameList.length)
+    nameList = find_elements(@@freelancerTile_List.to_s)
 
     nameElement = nameList[0]
     nameElement.location_once_scrolled_into_view
@@ -119,4 +127,7 @@ class FreelancerSearch_Po
     sleep(10)
   end
 
+  def assert_FreelancerDetails
+    freelancerName = find_element(@@freelancerNameOnDetailPage).text
+  end
 end
