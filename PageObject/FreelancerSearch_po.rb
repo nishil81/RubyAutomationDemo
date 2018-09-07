@@ -1,8 +1,8 @@
 require 'selenium-webdriver'
-require '../Specs/FreelancerSearch_specs'
 
-class FreelancerSearch_Po
-  # general varioables
+
+# This is page object file that contains all the locators and all logical functions that the require steps.
+class FreelancerSearch_po
 
   # xpath variables
 
@@ -17,16 +17,19 @@ class FreelancerSearch_Po
 
   @@freelancerNameOnDetailPage = "//div[@class='media-body']//span[@itemprop='name']"
 
-  browser = FreelancerSearch_Spec.setBrowser
 
-  def init
-    if searchSpec.browser.equal? 'chrome'
+  # Intialisation of driver and open browser
+  def init(browser)
 
-      Selenium::WebDriver::Chrome.driver_path = File.expand_path('../chromedriver_mac/chromedriver', Dir.pwd)
+    if browser.to_s.eql? 'chrome'
+
+      chromeDriverPath =  File.expand_path('../Lib/chromedriver_mac/chromedriver', Dir.pwd)
+      Selenium::WebDriver::Chrome.driver_path = chromeDriverPath
       @driver = Selenium::WebDriver.for :chrome
 
-    elsif searchSpec.browser.equal? 'firefox'
-      Selenium::WebDriver::Firefox.driver_path = File.expand_path('../geckodriver_mac/geckodriver', Dir.pwd)
+    elsif browser.to_s.eql? 'firefox'
+      geckodriverPath =  File.expand_path('../Lib/geckodriver_mac/geckodriver', Dir.pwd)
+      Selenium::WebDriver::Firefox.driver_path = geckodriverPath
       @driver = Selenium::WebDriver.for :firefox
 
       end
@@ -63,6 +66,7 @@ class FreelancerSearch_Po
     # sleep(200)
   end
 
+  # Parsing data from freelancer list
   def parse_data
     sleep(10)
     nameList = find_elements(@@freelancerName_List.to_s)
@@ -91,6 +95,7 @@ class FreelancerSearch_Po
     @@nameOnDetailPage = nameList[0].text
   end
 
+  # Verify searched keyword would be part of each freelacer.
   def assert_data(keyword)
     for i in 0..@freelancerList.length - 1
 
@@ -117,6 +122,7 @@ class FreelancerSearch_Po
       end
   end
 
+  # Select first freelancer from list
   def select_first_freelancer
     nameList = find_elements(@@freelancerTile_List.to_s)
 
@@ -127,7 +133,4 @@ class FreelancerSearch_Po
     sleep(10)
   end
 
-  def assert_FreelancerDetails
-    freelancerName = find_element(@@freelancerNameOnDetailPage).text
-  end
 end
